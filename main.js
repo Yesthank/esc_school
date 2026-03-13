@@ -26,10 +26,9 @@ class Game {
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(this.isMobile ? Math.min(window.devicePixelRatio, 1.5) : Math.min(window.devicePixelRatio, 2));
-    this.renderer.shadowMap.enabled = !this.isMobile; // 모바일에서 그림자 끄기
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.enabled = false;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 0.4; // 어둡게
+    this.renderer.toneMappingExposure = 1.2;
 
     this.scene = null;
     this.camera = null;
@@ -174,15 +173,19 @@ class Game {
       this.scene.clear();
     }
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x050510);
-    this.scene.fog = new THREE.FogExp2(0x050510, this.isMobile ? 0.03 : 0.02);
+    this.scene.background = new THREE.Color(0x87CEEB);
 
     // 카메라
     this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
 
-    // 앰비언트 라이트 (살짝 밝게)
-    const ambient = new THREE.AmbientLight(0x223344, 0.5);
+    // 환한 조명
+    const ambient = new THREE.AmbientLight(0xffffff, 1.0);
     this.scene.add(ambient);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    dirLight.position.set(10, 20, 10);
+    this.scene.add(dirLight);
+    const ambient2 = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+    this.scene.add(ambient2);
 
     // 맵 생성
     this.mapGen = new MapGenerator(this.scene);
