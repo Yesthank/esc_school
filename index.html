@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>야자째기 — 선생님을 피해 학교를 탈출하라</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 타이틀 화면 -->
+  <div id="title-screen">
+    <div class="title-overlay"></div>
+    <div class="title-content">
+      <h1 class="title-text">야자째기</h1>
+      <p class="title-subtitle">선생님을 피해 학교를 탈출하라</p>
+      <div class="menu-items">
+        <button class="menu-btn" id="btn-easy">새 게임 — 쉬움</button>
+        <button class="menu-btn" id="btn-normal">새 게임 — 보통</button>
+        <button class="menu-btn" id="btn-hard">새 게임 — 어려움</button>
+      </div>
+      <p class="title-hint">WASD 이동 | 마우스 시점 | Shift 달리기 | C 웅크리기 | E 상호작용 | F 손전등 | Tab 인벤토리</p>
+    </div>
+    <div class="flicker-overlay"></div>
+  </div>
+
+  <!-- 게임 HUD -->
+  <div id="hud" style="display:none;">
+    <div id="crosshair">+</div>
+    <div id="hud-bottom-left">
+      <div class="hud-bar">
+        <span class="hud-label">🔦 배터리</span>
+        <div class="bar-bg"><div class="bar-fill" id="battery-bar"></div></div>
+      </div>
+      <div class="hud-bar">
+        <span class="hud-label">🏃 스태미나</span>
+        <div class="bar-bg"><div class="bar-fill stamina" id="stamina-bar"></div></div>
+      </div>
+    </div>
+    <div id="hud-bottom-right">
+      <div id="inventory-hint">[Tab] 인벤토리</div>
+    </div>
+    <div id="heartbeat-container">
+      <span id="heartbeat">♥♥♥♥</span>
+    </div>
+    <div id="interaction-prompt" style="display:none;">
+      <span>[E]</span> <span id="interaction-text"></span>
+    </div>
+    <div id="teacher-warning" style="display:none;">
+      <span>⚠ 선생님이 근처에 있습니다!</span>
+    </div>
+    <div id="objective-display">
+      <span id="objective-text">목표: 교무실 열쇠를 찾아라</span>
+    </div>
+  </div>
+
+  <!-- 인벤토리 -->
+  <div id="inventory-screen" style="display:none;">
+    <h2>인벤토리</h2>
+    <div id="inventory-slots"></div>
+    <p class="inventory-hint">Tab으로 닫기 | 슬롯 클릭으로 아이템 사용</p>
+  </div>
+
+  <!-- 일시정지 -->
+  <div id="pause-screen" style="display:none;">
+    <h2>일시정지</h2>
+    <button class="menu-btn" id="btn-resume">이어하기</button>
+    <button class="menu-btn" id="btn-quit">메뉴로</button>
+  </div>
+
+  <!-- 게임오버 -->
+  <div id="gameover-screen" style="display:none;">
+    <div class="gameover-overlay"></div>
+    <div class="gameover-content">
+      <h1 class="gameover-text">방과 후 남으세요.</h1>
+      <p id="gameover-subtitle"></p>
+      <button class="menu-btn" id="btn-retry">재도전</button>
+      <button class="menu-btn" id="btn-menu">메뉴로</button>
+    </div>
+  </div>
+
+  <!-- 클리어 -->
+  <div id="clear-screen" style="display:none;">
+    <div class="clear-overlay"></div>
+    <div class="clear-content">
+      <h1 class="clear-text">탈출 성공!</h1>
+      <div id="clear-stats"></div>
+      <button class="menu-btn" id="btn-clear-menu">메뉴로</button>
+    </div>
+  </div>
+
+  <!-- 포인터 락 안내 -->
+  <div id="pointer-lock-overlay" style="display:none;">
+    <p>클릭하여 게임에 집중하세요</p>
+    <p class="small">ESC로 일시정지</p>
+  </div>
+
+  <canvas id="game-canvas"></canvas>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
