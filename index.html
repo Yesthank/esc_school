@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>야자째기 — 선생님을 피해 학교를 탈출하라</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -18,7 +18,8 @@
         <button class="menu-btn" id="btn-normal">새 게임 — 보통</button>
         <button class="menu-btn" id="btn-hard">새 게임 — 어려움</button>
       </div>
-      <p class="title-hint">WASD 이동 | 마우스 시점 | Shift 달리기 | C 웅크리기 | E 상호작용 | F 손전등 | Tab 인벤토리</p>
+      <p class="title-hint title-hint-desktop">WASD 이동 | 마우스 시점 | Shift 달리기 | C 웅크리기 | E 상호작용 | F 손전등 | Tab 인벤토리</p>
+      <p class="title-hint title-hint-mobile">왼쪽 터치: 이동 (세게 밀면 달리기) | 오른쪽 터치: 시점 | 화면 버튼: 상호작용</p>
     </div>
     <div class="flicker-overlay"></div>
   </div>
@@ -92,6 +93,16 @@
   <div id="pointer-lock-overlay" style="display:none;">
     <p>클릭하여 게임에 집중하세요</p>
     <p class="small">ESC로 일시정지</p>
+  </div>
+
+  <!-- 모바일 액션 버튼 -->
+  <div id="mobile-controls" style="display:none;">
+    <button class="mobile-btn" id="mbtn-interact">E<br><span>상호작용</span></button>
+    <button class="mobile-btn" id="mbtn-flashlight">F<br><span>손전등</span></button>
+    <button class="mobile-btn" id="mbtn-crouch">C<br><span>웅크리기</span></button>
+    <button class="mobile-btn" id="mbtn-inventory">Tab<br><span>인벤토리</span></button>
+    <button class="mobile-btn" id="mbtn-pause">II<br><span>일시정지</span></button>
+    <button class="mobile-btn" id="mbtn-useitem">Q<br><span>아이템</span></button>
   </div>
 
   <canvas id="game-canvas"></canvas>

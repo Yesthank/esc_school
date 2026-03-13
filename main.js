@@ -14,11 +14,19 @@ class Game {
     this.difficulty = DIFFICULTY.NORMAL;
     this.canvas = document.getElementById('game-canvas');
 
-    // Three.js 초기화
-    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
+    // 모바일 감지
+    this.isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      || ('ontouchstart' in window && window.innerWidth < 1024);
+
+    // Three.js 초기화 (모바일 성능 최적화 포함)
+    this.renderer = new THREE.WebGLRenderer({
+      canvas: this.canvas,
+      antialias: !this.isMobile, // 모바일에서 AA 끄기
+      powerPreference: this.isMobile ? 'low-power' : 'high-performance',
+    });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.shadowMap.enabled = true;
+    this.renderer.setPixelRatio(this.isMobile ? Math.min(window.devicePixelRatio, 1.5) : Math.min(window.devicePixelRatio, 2));
+    this.renderer.shadowMap.enabled = !this.isMobile; // 모바일에서 그림자 끄기
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 0.4; // 어둡게
@@ -45,6 +53,7 @@ class Game {
 
     this._setupUI();
     this._bindInput();
+    if (this.isMobile) this._setupMobileButtons();
     this._animate();
   }
 
@@ -119,20 +128,36 @@ class Game {
       }
     };
 
-    // 포인터 락 해제 감지
-    document.addEventListener('pointerlockchange', () => {
-      if (!document.pointerLockElement && this.state === GAME_STATE.PLAYING) {
-        document.getElementById('pointer-lock-overlay').style.display = 'flex';
-      }
-    });
+    // 데스크탑 전용: 포인터 락 처리
+    if (!this.isMobile) {
+      document.addEventListener('pointerlockchange', () => {
+        if (!document.pointerLockElement && this.state === GAME_STATE.PLAYING) {
+          document.getElementById('pointer-lock-overlay').style.display = 'flex';
+        }
+      });
 
-    // 캔버스 클릭으로 포인터 락
-    this.canvas.addEventListener('click', () => {
-      if (this.state === GAME_STATE.PLAYING && !document.pointerLockElement) {
-        this.input.requestPointerLock(this.canvas);
-        document.getElementById('pointer-lock-overlay').style.display = 'none';
-      }
-    });
+      this.canvas.addEventListener('click', () => {
+        if (this.state === GAME_STATE.PLAYING && !document.pointerLockElement) {
+          this.input.requestPointerLock(this.canvas);
+          document.getElementById('pointer-lock-overlay').style.display = 'none';
+        }
+      });
+    }
+  }
+
+  // ─── 모바일 버튼 연결 ──────────────────────────
+  _setupMobileButtons() {
+    const btn = (id, fn) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); fn(); }, { passive: false });
+    };
+
+    btn('mbtn-interact', () => this.input.triggerInteract());
+    btn('mbtn-flashlight', () => this.input.triggerFlashlight());
+    btn('mbtn-crouch', () => this.input.triggerCrouch());
+    btn('mbtn-inventory', () => this.input.triggerInventory());
+    btn('mbtn-pause', () => this.input.triggerPause());
+    btn('mbtn-useitem', () => this.input.triggerUseItem());
   }
 
   // ─── 게임 시작 ──────────────────────────────
@@ -150,7 +175,7 @@ class Game {
     }
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x050510);
-    this.scene.fog = new THREE.FogExp2(0x050510, 0.04);
+    this.scene.fog = new THREE.FogExp2(0x050510, this.isMobile ? 0.06 : 0.04);
 
     // 카메라
     this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -198,7 +223,16 @@ class Game {
     document.getElementById('pause-screen').style.display = 'none';
     document.getElementById('inventory-screen').style.display = 'none';
     document.getElementById('hud').style.display = 'block';
-    document.getElementById('pointer-lock-overlay').style.display = 'flex';
+
+    if (this.isMobile) {
+      // 모바일: 포인터 락 불필요, 바로 시작
+      document.getElementById('pointer-lock-overlay').style.display = 'none';
+      document.getElementById('mobile-controls').style.display = 'block';
+      this.input.isPointerLocked = true;
+    } else {
+      document.getElementById('pointer-lock-overlay').style.display = 'flex';
+      document.getElementById('mobile-controls').style.display = 'none';
+    }
 
     this.state = GAME_STATE.PLAYING;
 
@@ -708,20 +742,27 @@ class Game {
   pause() {
     this.state = GAME_STATE.PAUSED;
     document.getElementById('pause-screen').style.display = 'block';
-    document.exitPointerLock();
+    document.getElementById('mobile-controls').style.display = 'none';
+    if (!this.isMobile) document.exitPointerLock();
   }
 
   resume() {
     this.state = GAME_STATE.PLAYING;
     document.getElementById('pause-screen').style.display = 'none';
-    this.input.requestPointerLock(this.canvas);
+    if (this.isMobile) {
+      document.getElementById('mobile-controls').style.display = 'block';
+      this.input.isPointerLocked = true;
+    } else {
+      this.input.requestPointerLock(this.canvas);
+    }
   }
 
   gameOver() {
     this.state = GAME_STATE.GAMEOVER;
     this.audio.stopAll();
     this.audio.playGameOver();
-    document.exitPointerLock();
+    if (!this.isMobile) document.exitPointerLock();
+    document.getElementById('mobile-controls').style.display = 'none';
 
     this._removeHidingVignette();
 
@@ -748,7 +789,8 @@ class Game {
     this.state = GAME_STATE.CLEAR;
     this.audio.stopAll();
     this.audio.playClear();
-    document.exitPointerLock();
+    if (!this.isMobile) document.exitPointerLock();
+    document.getElementById('mobile-controls').style.display = 'none';
 
     this._removeHidingVignette();
 
@@ -765,7 +807,8 @@ class Game {
   showTitle() {
     this.state = GAME_STATE.TITLE;
     this.audio.stopAll();
-    document.exitPointerLock();
+    if (!this.isMobile) document.exitPointerLock();
+    document.getElementById('mobile-controls').style.display = 'none';
 
     this._removeHidingVignette();
 
