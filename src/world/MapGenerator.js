@@ -283,7 +283,7 @@ export class MapGenerator {
           const wz = z * CONFIG.CELL_SIZE;
 
           // 형광등 (불안정하게 켜짐)
-          const light = new THREE.PointLight(0xCCFFCC, 1.5, 15);
+          const light = new THREE.PointLight(0xFFFFEE, 2.5, 20);
           light.position.set(wx, floorY + CONFIG.WALL_HEIGHT - 0.2, wz);
           light.castShadow = false;
           this.scene.add(light);
@@ -293,7 +293,7 @@ export class MapGenerator {
           const tubeMat = new THREE.MeshStandardMaterial({
             color: 0xFFFFFF,
             emissive: 0xCCFFCC,
-            emissiveIntensity: 0.5,
+            emissiveIntensity: 1.0,
           });
           const tube = new THREE.Mesh(tubeGeo, tubeMat);
           tube.position.copy(light.position);
