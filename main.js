@@ -175,13 +175,13 @@ class Game {
     }
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x050510);
-    this.scene.fog = new THREE.FogExp2(0x050510, this.isMobile ? 0.06 : 0.04);
+    this.scene.fog = new THREE.FogExp2(0x050510, this.isMobile ? 0.03 : 0.02);
 
     // 카메라
     this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
 
-    // 앰비언트 라이트 (매우 어둡게)
-    const ambient = new THREE.AmbientLight(0x111122, 0.15);
+    // 앰비언트 라이트 (살짝 밝게)
+    const ambient = new THREE.AmbientLight(0x223344, 0.5);
     this.scene.add(ambient);
 
     // 맵 생성
