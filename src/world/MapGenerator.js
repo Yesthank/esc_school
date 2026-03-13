@@ -19,19 +19,29 @@ export class MapGenerator {
   }
 
   _createMaterials() {
-    // 한국 학교 느낌 머티리얼
+    // 한국 학교 느낌 머티리얼 (MeshLambertMaterial로 경량화)
+    const L = THREE.MeshLambertMaterial;
     this.materials = {
-      wall: new THREE.MeshStandardMaterial({ color: 0xE8E0D0, roughness: 0.9 }),
-      floor: new THREE.MeshStandardMaterial({ color: 0x8B7355, roughness: 0.7 }),
-      ceiling: new THREE.MeshStandardMaterial({ color: 0xF5F5F0, roughness: 0.8 }),
-      door: new THREE.MeshStandardMaterial({ color: 0x654321, roughness: 0.6 }),
-      doorLocked: new THREE.MeshStandardMaterial({ color: 0x8B0000, roughness: 0.6 }),
-      classroom: new THREE.MeshStandardMaterial({ color: 0xD4C4A0, roughness: 0.85 }),
-      locker: new THREE.MeshStandardMaterial({ color: 0x556B2F, metalness: 0.3, roughness: 0.4 }),
-      hideSpot: new THREE.MeshStandardMaterial({ color: 0x3a5a3a, metalness: 0.2, roughness: 0.5 }),
-      stairs: new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.4, roughness: 0.3 }),
-      item: new THREE.MeshStandardMaterial({ color: 0xFFDD00, emissive: 0xFFAA00, emissiveIntensity: 0.5 }),
-      exit: new THREE.MeshStandardMaterial({ color: 0x00FF44, emissive: 0x00FF44, emissiveIntensity: 0.3 }),
+      wall: new L({ color: 0xE8E0D0 }),
+      floor: new L({ color: 0x8B7355 }),
+      ceiling: new L({ color: 0xF5F5F0 }),
+      door: new L({ color: 0x654321 }),
+      doorLocked: new L({ color: 0x8B0000 }),
+      classroom: new L({ color: 0xD4C4A0 }),
+      locker: new L({ color: 0x556B2F }),
+      hideSpot: new L({ color: 0x3a5a3a }),
+      stairs: new L({ color: 0x888888 }),
+      item: new L({ color: 0xFFDD00, emissive: 0xFFAA00, emissiveIntensity: 0.5 }),
+      exit: new L({ color: 0x00FF44, emissive: 0x00FF44, emissiveIntensity: 0.3 }),
+      tube: new L({ color: 0xFFFFFF, emissive: 0xCCFFCC, emissiveIntensity: 1.0 }),
+    };
+
+    // 공유 지오메트리 (매번 새로 만들지 않음)
+    this.sharedGeo = {
+      wall: new THREE.BoxGeometry(CONFIG.CELL_SIZE, CONFIG.WALL_HEIGHT, CONFIG.CELL_SIZE),
+      floor: new THREE.PlaneGeometry(CONFIG.CELL_SIZE, CONFIG.CELL_SIZE),
+      tube: new THREE.BoxGeometry(1.2, 0.05, 0.1),
+      item: new THREE.SphereGeometry(0.2, 8, 8),
     };
   }
 
@@ -107,11 +117,8 @@ export class MapGenerator {
   }
 
   _createWall(x, y, z) {
-    const geo = new THREE.BoxGeometry(CONFIG.CELL_SIZE, CONFIG.WALL_HEIGHT, CONFIG.CELL_SIZE);
-    const mesh = new THREE.Mesh(geo, this.materials.wall);
+    const mesh = new THREE.Mesh(this.sharedGeo.wall, this.materials.wall);
     mesh.position.set(x, y + CONFIG.WALL_HEIGHT / 2, z);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
     this.scene.add(mesh);
 
     this.colliders.push({
@@ -129,17 +136,14 @@ export class MapGenerator {
   }
 
   _createFloor(x, y, z, type = 'floor') {
-    const geo = new THREE.PlaneGeometry(CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
-    const mesh = new THREE.Mesh(geo, this.materials[type]);
+    const mesh = new THREE.Mesh(this.sharedGeo.floor, this.materials[type]);
     mesh.rotation.x = -Math.PI / 2;
     mesh.position.set(x, y, z);
-    mesh.receiveShadow = true;
     this.scene.add(mesh);
   }
 
   _createCeiling(x, y, z) {
-    const geo = new THREE.PlaneGeometry(CONFIG.CELL_SIZE, CONFIG.CELL_SIZE);
-    const mesh = new THREE.Mesh(geo, this.materials.ceiling);
+    const mesh = new THREE.Mesh(this.sharedGeo.floor, this.materials.ceiling);
     mesh.rotation.x = Math.PI / 2;
     mesh.position.set(x, y, z);
     this.scene.add(mesh);
@@ -151,7 +155,6 @@ export class MapGenerator {
     const mat = doorData.locked ? this.materials.doorLocked : this.materials.door;
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(pos.x, floorNum * CONFIG.WALL_HEIGHT + CONFIG.WALL_HEIGHT * 0.42, pos.z);
-    mesh.castShadow = true;
     this.scene.add(mesh);
 
     const door = {
@@ -225,17 +228,11 @@ export class MapGenerator {
     const geo = new THREE.BoxGeometry(CONFIG.CELL_SIZE * 0.6, CONFIG.WALL_HEIGHT * 0.7, CONFIG.CELL_SIZE * 0.4);
     const mesh = new THREE.Mesh(geo, this.materials.hideSpot);
     mesh.position.set(x, y + CONFIG.WALL_HEIGHT * 0.35, z);
-    mesh.castShadow = true;
     this.scene.add(mesh);
   }
 
   _createExit(x, y, z) {
-    // 출구 표시 — 초록색 글로우
-    const light = new THREE.PointLight(0x00FF44, 0.8, 8);
-    light.position.set(x, y + 2.5, z);
-    this.scene.add(light);
-
-    // EXIT 표시판
+    // EXIT 표시판 (PointLight 제거 → emissive만)
     const geo = new THREE.PlaneGeometry(1.5, 0.5);
     const mesh = new THREE.Mesh(geo, this.materials.exit);
     mesh.position.set(x, y + 2.6, z);
@@ -246,22 +243,14 @@ export class MapGenerator {
 
   _createItem(itemData, floorNum) {
     const pos = gridToWorld(itemData.gridX, itemData.gridZ, floorNum);
-    const geo = new THREE.SphereGeometry(0.2, 8, 8);
-    const mesh = new THREE.Mesh(geo, this.materials.item);
+    const mesh = new THREE.Mesh(this.sharedGeo.item, this.materials.item);
     mesh.position.set(pos.x, floorNum * CONFIG.WALL_HEIGHT + 0.8, pos.z);
     this.scene.add(mesh);
-
-    // 아이템 빛
-    const light = new THREE.PointLight(0xFFAA00, 0.5, 4);
-    light.position.copy(mesh.position);
-    light.position.y += 0.3;
-    this.scene.add(light);
 
     const itemDef = Object.values(ITEMS).find(i => i.id === itemData.type);
 
     this.items.push({
       mesh,
-      light,
       position: new THREE.Vector3(pos.x, pos.y, pos.z),
       floor: floorNum,
       type: itemData.type,
@@ -282,79 +271,47 @@ export class MapGenerator {
           const wx = x * CONFIG.CELL_SIZE;
           const wz = z * CONFIG.CELL_SIZE;
 
-          // 형광등 (불안정하게 켜짐)
-          const light = new THREE.PointLight(0xFFFFEE, 2.5, 20);
-          light.position.set(wx, floorY + CONFIG.WALL_HEIGHT - 0.2, wz);
-          light.castShadow = false;
-          this.scene.add(light);
-
-          // 형광등 튜브 메시
-          const tubeGeo = new THREE.BoxGeometry(1.2, 0.05, 0.1);
-          const tubeMat = new THREE.MeshStandardMaterial({
-            color: 0xFFFFFF,
-            emissive: 0xCCFFCC,
-            emissiveIntensity: 1.0,
-          });
-          const tube = new THREE.Mesh(tubeGeo, tubeMat);
-          tube.position.copy(light.position);
+          // 형광등 튜브 메시 (PointLight 제거 → emissive만 사용하여 성능 개선)
+          const tube = new THREE.Mesh(this.sharedGeo.tube, this.materials.tube.clone());
+          tube.position.set(wx, floorY + CONFIG.WALL_HEIGHT - 0.2, wz);
           this.scene.add(tube);
 
           this.lights.push({
-            light,
             tube,
-            baseIntensity: 0.8,
+            position: tube.position,
             flickerTimer: Math.random() * 10,
             flickerSpeed: 0.5 + Math.random() * 2,
-            isNearTeacher: false,
           });
-        }
-      }
-    }
-
-    // 비상등 (복도 끝, 계단 근처) — 빨간 약한 빛
-    for (let z = 0; z < grid.length; z++) {
-      for (let x = 0; x < grid[z].length; x++) {
-        const cell = grid[z][x];
-        if (cell === 'U' || cell === 'W') {
-          const wx = x * CONFIG.CELL_SIZE;
-          const wz = z * CONFIG.CELL_SIZE;
-          const emLight = new THREE.PointLight(0xFF2200, 0.3, 6);
-          emLight.position.set(wx, floorY + CONFIG.WALL_HEIGHT - 0.3, wz);
-          this.scene.add(emLight);
         }
       }
     }
   }
 
-  // 형광등 업데이트 (깜빡임)
+  // 형광등 업데이트 (깜빡임 — emissive만 제어)
   updateLights(deltaTime, teacherPositions) {
     for (const fl of this.lights) {
       fl.flickerTimer += deltaTime * fl.flickerSpeed;
 
-      // 선생님 근처의 형광등은 더 심하게 깜빡임
+      // 선생님 근처 확인
       let nearTeacher = false;
       for (const tp of teacherPositions) {
-        const dist = fl.light.position.distanceTo(tp);
-        if (dist < 12) {
+        const dx = fl.position.x - tp.x;
+        const dz = fl.position.z - tp.z;
+        if (dx * dx + dz * dz < 144) { // 12*12
           nearTeacher = true;
           break;
         }
       }
 
       if (nearTeacher) {
-        // 선생님 접근 시 형광등 불안정
         if (Math.random() < 0.15) {
-          fl.light.intensity = Math.random() > 0.3 ? fl.baseIntensity * 1.5 : 0;
-          fl.tube.material.emissiveIntensity = fl.light.intensity > 0 ? 0.8 : 0;
+          fl.tube.material.emissiveIntensity = Math.random() > 0.3 ? 1.0 : 0;
         }
       } else {
-        // 일반 깜빡임 (드물게)
         if (Math.sin(fl.flickerTimer * 10) > 0.95) {
-          fl.light.intensity = 0;
           fl.tube.material.emissiveIntensity = 0;
         } else {
-          fl.light.intensity = fl.baseIntensity;
-          fl.tube.material.emissiveIntensity = 0.5;
+          fl.tube.material.emissiveIntensity = 1.0;
         }
       }
     }
@@ -378,7 +335,6 @@ export class MapGenerator {
     if (item.collected) return false;
     item.collected = true;
     item.mesh.visible = false;
-    item.light.visible = false;
     return true;
   }
 

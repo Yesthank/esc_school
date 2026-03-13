@@ -26,10 +26,9 @@ class Game {
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(this.isMobile ? Math.min(window.devicePixelRatio, 1.5) : Math.min(window.devicePixelRatio, 2));
-    this.renderer.shadowMap.enabled = !this.isMobile; // 모바일에서 그림자 끄기
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.enabled = false;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 0.4; // 어둡게
+    this.renderer.toneMappingExposure = 1.2;
 
     this.scene = null;
     this.camera = null;

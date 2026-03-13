@@ -126,8 +126,8 @@ export class InputManager {
         // 시점 회전
         const dx = touch.clientX - this._touchLookOrigin.x;
         const dy = touch.clientY - this._touchLookOrigin.y;
-        this.mouseDX -= dx * 0.6;
-        this.mouseDY -= dy * 0.6;
+        this.mouseDX += dx * 0.6;
+        this.mouseDY += dy * 0.6;
         this._touchLookOrigin = { x: touch.clientX, y: touch.clientY };
       }
     }
