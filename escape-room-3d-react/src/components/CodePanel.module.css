@@ -1,0 +1,94 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.panel {
+  background: #0a0a0a;
+  border: 1px solid #333;
+  padding: 30px;
+  border-radius: 8px;
+  text-align: center;
+  min-width: 300px;
+}
+
+.panel h3 {
+  color: #00e5ff;
+  margin-bottom: 5px;
+  font-weight: 400;
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 0.8em;
+  margin-bottom: 20px;
+}
+
+.display {
+  font-size: 2.5em;
+  letter-spacing: 15px;
+  color: #fff;
+  margin: 20px 0;
+  min-height: 50px;
+  font-family: monospace;
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 240px;
+  margin: 0 auto;
+}
+
+.key {
+  padding: 15px;
+  font-size: 1.2em;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.key:hover {
+  background: #333;
+  border-color: #00e5ff;
+}
+
+.key:active {
+  transform: scale(0.95);
+}
+
+.action {
+  background: #0d2b30;
+  border-color: rgba(0, 229, 255, 0.267);
+}
+
+.result {
+  margin-top: 15px;
+  min-height: 24px;
+  font-size: 0.9em;
+}
+
+.closeBtn {
+  margin-top: 15px;
+  padding: 6px 20px;
+  background: none;
+  border: 1px solid #444;
+  color: #888;
+  cursor: pointer;
+  border-radius: 4px;
+  font-family: inherit;
+}

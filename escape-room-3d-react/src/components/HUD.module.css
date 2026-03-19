@@ -1,0 +1,128 @@
+.crosshair {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 50;
+  pointer-events: none;
+}
+
+.crosshair::before,
+.crosshair::after {
+  content: '';
+  position: absolute;
+  background: #fff;
+  opacity: 0.7;
+}
+
+.crosshair::before {
+  width: 2px;
+  height: 20px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.crosshair::after {
+  width: 20px;
+  height: 2px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.interactPrompt {
+  position: fixed;
+  top: 55%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.inventoryBar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  display: flex;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.invSlot {
+  width: 60px;
+  height: 60px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7em;
+  text-align: center;
+  border-radius: 4px;
+  padding: 4px;
+  transition: all 0.3s;
+}
+
+.filled {
+  background: rgba(0, 229, 255, 0.1);
+}
+
+.timer {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 50;
+  font-size: 1.3em;
+  letter-spacing: 2px;
+  color: #aaa;
+  font-variant-numeric: tabular-nums;
+}
+
+.roomName {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 50;
+  font-size: 0.9em;
+  color: #666;
+  letter-spacing: 2px;
+}
+
+@media (max-width: 768px), (hover: none) {
+  .crosshair::before {
+    width: 2px;
+    height: 14px;
+  }
+  .crosshair::after {
+    width: 14px;
+    height: 2px;
+  }
+  .inventoryBar {
+    bottom: 10px;
+    gap: 4px;
+  }
+  .invSlot {
+    width: 45px;
+    height: 45px;
+    font-size: 0.6em;
+  }
+  .timer {
+    font-size: 1em;
+    top: 10px;
+    right: 10px;
+  }
+  .roomName {
+    font-size: 0.75em;
+    top: 10px;
+    left: 10px;
+  }
+}
